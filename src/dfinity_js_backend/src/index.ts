@@ -1,9 +1,21 @@
-import { auto } from "@popperjs/core";
-import { query, update, text, Record, StableBTreeMap, Variant, Vec, None, Some, Ok, Err, ic, Principal, Opt, nat64, Duration, Result, bool, Canister } from "azle";
 import {
-    Ledger, binaryAddressFromAddress, binaryAddressFromPrincipal, hexAddressFromPrincipal
+    query,
+    update,
+    text,
+    Record,
+    StableBTreeMap,
+    Variant,
+    Vec,
+    ic,
+    Principal,
+    Result,
+    Ok,
+    Err,
+} from "azle";
+import {
+    Ledger,
+    binaryAddressFromPrincipal,
 } from "azle/canisters/ledger";
-import { hashCode } from "hashcode";
 import { v4 as uuidv4 } from "uuid";
 
 const Participant = Record({
@@ -27,103 +39,52 @@ const Game = Record({
     participants: Vec(Participant),
 });
 
-
-// participant payload 
-const ParticipantPayload = Record({
-    name: text,
-    email: text,
-    phone: text,
-    address: text,
-    interest: text,
-});
-
-// Game payload
-const GamePayload = Record({
-    title: text,
-    description: text,
-    organiser: text,
-    category: text,
-    startDate: text,
-    endDate: text,
-    location: text,
-});
-
 const Message = Variant({
     NotFound: text,
     InvalidPayload: text,
-    PaymentFailed: text,
-    PaymentCompleted: text
 });
 
-
-const gameStorage = StableBTreeMap(0,text, Game)
-const participantStorage =  StableBTreeMap(1,text, Participant)
-
-
-
-
-/* 
-    initialization of the Ledger canister. The principal text value is hardcoded because 
-    we set it in the `dfx.json`
-*/
+const gameStorage = StableBTreeMap(0, text, Game);
+const participantStorage = StableBTreeMap(1, text, Participant);
 const icpCanister = Ledger(Principal.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai"));
 
 export default Canister({
-    // Get all the Games
-    getGames: query([], Vec(Game),() => {
-        return gameStorage.values();
-    }),
-    // Get a Game by id
-    getGame: query([text], Result(Game, Message), (id) => { 
+    getGames: query([], Vec(Game), () => gameStorage.values()),
+
+    getGame: query([text], Result(Game, Message), (id) => {
         const gameOpt = gameStorage.get(id);
-        if ("None" in gameOpt) {
-            return Err({ NotFound: `game with id=${id} not found` });
-        }
-        return Ok(gameOpt.Some);
-    }   
-    ),
-    // Filter the games by Category
-    filterGamesByCategory: query([text], Vec(Game), (category) => {
-        return gameStorage.values().filter((game) => game.category === category);
-    }
+        return gameOpt.match({
+            None: () => Err({ NotFound: `Game with id=${id} not found` }),
+            Some: (game) => Ok(game),
+        });
+    }),
+
+    filterGamesByCategory: query([text], Vec(Game), (category) =>
+        gameStorage.values().filter((game) => game.category === category)
     ),
 
-    //Search for a game and return the result as a list of games or an error message
-    searchGames: query([text], Result(Vec(Game), Message), (searchTerm) => {
-        const lowerCaseSearchInput = searchTerm.toLowerCase();
-        try {
-            const searchedGames = gameStorage.values().filter((game) => game.title.toLowerCase().includes(lowerCaseSearchInput) || game.organiser.toLowerCase().includes(lowerCaseSearchInput));
-            
-            return Ok(searchedGames);
-        } catch (error) {
-            return Err({ NotFound: `Game with the term ${searchTerm} has not been found in title or Organiser` });
-        }
-
-    }
+    searchGames: query([text], Vec(Game), (searchTerm) =>
+        gameStorage.values().filter((game) =>
+            game.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            game.organiser.toLowerCase().includes(searchTerm.toLowerCase())
+        )
     ),
 
-    // Insert a participant into the game's participants list
     insertParticipant: update([text, text], Result(Game, Message), (gameId, participantId) => {
         const gameOpt = gameStorage.get(gameId);
-        if ("None" in gameOpt) {
-            return Err({ NotFound: `cannot add participant: game with id=${gameId} not found` });
-        }
         const participantOpt = participantStorage.get(participantId);
-        if ("None" in participantOpt) {
-            return Err({ NotFound: `cannot add participant: participant with id=${participantId} not found` });
-        }
-        if (gameOpt.Some.particpants.includes(participantId)) {
-            return Err({ NotFound: `cannot add participant: participant with id=${participantId} already added to game with id=${gameId}` });
-        }
 
-        const participant = participantOpt.Some;
-        gameOpt.Some.participants.push(participant);
-        gameStorage.insert(gameId, gameOpt.Some);
-        return Ok(gameOpt.Some);
-    }
-    ),
-
-
+        return gameOpt.andThen((game) =>
+            participantOpt.andThen((participant) => {
+                if (game.participants.includes(participant)) {
+                    return Err({ InvalidPayload: `Participant with id=${participantId} already added to game with id=${gameId}` });
+                }
+                const updatedGame = game.update({ participants: game.participants.concat([participant]) });
+                gameStorage.insert(gameId, updatedGame);
+                return Ok(updatedGame);
+            })
+        ).getOrElse(() => Err({ NotFound: `Game or Participant not found` }));
+    }),
 
     // remove Participant from game
     removeParticipant: update([text, text], Result(Game, Message), (gameId, participantId) => {
@@ -284,5 +245,3 @@ globalThis.crypto = {
         return array;
     }
 };
-
-
