@@ -44,43 +44,43 @@ export async function searchGames(search) {
 }
 
 // Insert Participant in the game
-export async function insertParticipant(gameId, participant) {
-  return window.canister.marketplace.insertParticipant(gameId, participant);
+export async function insertParticipant(gameId, participantId) {
+  return window.canister.marketplace.insertParticipant(gameId, participantId);
 }
 
 // removeParticipant from the game
-export async function removeParticipant(gameId, participant) {
-  return window.canister.marketplace.removeParticipant(gameId, participant);
+export async function removeParticipant(gameId, participantId) {
+  return window.canister.marketplace.removeParticipant(gameId, participantId);
 }
 
 // addParticipant
-export async function createParticipant(gameId, participant) {
-  return window.canister.marketplace.addParticipant(gameId, participant);
+export async function createParticipant(participant) {
+  return window.canister.marketplace.addParticipant(participant);
 }
 
 // updateParticipant
-export async function updateParticipant(gameId, participant) {
-  return window.canister.marketplace.updateParticipant(gameId, participant);
+export async function updateParticipant( participant) {
+  return window.canister.marketplace.updateParticipant(participant);
 }
 
 // deleteParticipant
-export async function deleteParticipant(gameId, participant) {
-  return window.canister.marketplace.deleteParticipant(gameId, participant);
+export async function deleteParticipant( participantId) {
+  return window.canister.marketplace.deleteParticipant(participantId);
 }
 
 // getParticipants
-export async function getParticipants(gameId) {
-  return window.canister.marketplace.getParticipants(gameId);
+export async function getParticipants() {
+  return window.canister.marketplace.getParticipants();
 }
 
 // getParticipant
-export async function getParticipant(gameId, participant) {
-  return window.canister.marketplace.getParticipant(gameId, participant);
+export async function getParticipant( participantId) {
+  return window.canister.marketplace.getParticipant(participantId);
 }
 
 // searchParticipants
-export async function searchParticipants(gameId, search) {
-  return window.canister.marketplace.searchParticipants(gameId, search);
+export async function searchParticipants(searchTerm) {
+  return window.canister.marketplace.searchParticipants(searchTerm);
 }
 
 // getGameParticipants
