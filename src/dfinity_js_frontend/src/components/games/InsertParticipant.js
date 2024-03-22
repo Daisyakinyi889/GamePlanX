@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Button, Modal, Table } from "react-bootstrap";
 import { getParticipants as getParticipantsList, insertParticipant } from "../../utils/marketplace";
+import { NotificationError, NotificationSuccess } from "../utils/Notifications";
+import {toast} from 'react-toastify';
 
 const InsertParticipant = ({gameId}) => {
 
     const [participants, setParticipants] = useState([]);
+    const id = gameId;
+
 
     const [show, setShow] = useState(false);
 
@@ -22,9 +26,12 @@ const InsertParticipant = ({gameId}) => {
 
     const handleInsertParticipant = async (participantId) => {
         try {
-            await insertParticipant(gameId, participantId);
+            await insertParticipant(id, participantId);
+            toast(<NotificationSuccess text="Participant added to Game  successfully." />);
+
         } catch (error) {
             console.log({ error });
+            toast(<NotificationError text="Participant add to Game not successfully." />);
         }
     }
 
@@ -36,15 +43,15 @@ const InsertParticipant = ({gameId}) => {
   return (
     <>
          <Button
-            variant="outline-dark"
-            className="w-100 py-3"
+            variant="success"
+            className="mx-2 py-1"
             onClick={handleShow}
 
           >
             {/* Here insert Participant to Game */}
             Join
           </Button>
-        <Modal show={show} onHide={handleClose} centered>
+        <Modal show={show} onHide={handleClose} centered size="xl">
             <Modal.Header closeButton>
                 <Modal.Title>Insert Participant</Modal.Title>
             </Modal.Header>

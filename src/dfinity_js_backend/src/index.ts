@@ -84,7 +84,7 @@ export default Canister({
     ),
     // Filter the games by Category
     filterGamesByCategory: query([text], Vec(Game), (category) => {
-        return gameStorage.values().filter((game) => game.category === category);
+        return gameStorage.values().filter((game) => game.category.toLowerCase() === category.toLowerCase());
     }
     ),
 
@@ -112,9 +112,9 @@ export default Canister({
         if ("None" in participantOpt) {
             return Err({ NotFound: `cannot add participant: participant with id=${participantId} not found` });
         }
-        if (gameOpt.Some.particpants.includes(participantId)) {
-            return Err({ NotFound: `cannot add participant: participant with id=${participantId} already added to game with id=${gameId}` });
-        }
+        // if (gameOpt.Some.participants && gameOpt.Some.particpants.includes(participantId)) {
+        //     return Err({ NotFound: `cannot add participant: participant with id=${participantId} already added to game with id=${gameId}` });
+        // }
 
         const participant = participantOpt.Some;
         gameOpt.Some.participants.push(participant);
@@ -136,9 +136,9 @@ export default Canister({
         if ("None" in participantOpt) {
             return Err({ NotFound: `cannot remove participant: participant with id=${participantId} not found` });
         }
-        if (!gameOpt.Some.particpants.includes(participantId)) {
-            return Err({ NotFound: `cannot remove participant: participant with id=${participantId} not found in game with id=${gameId}` });
-        }
+        // if (!gameOpt.Some.particpants.includes(participantId)) {
+        //     return Err({ NotFound: `cannot remove participant: participant with id=${participantId} not found in game with id=${gameId}` });
+        // }
         const participants = gameOpt.Some.participants;
 
         for (let i = 0; i < participants.length; i++) {
@@ -235,14 +235,9 @@ export default Canister({
     //Search for a participant and return the result as a list of participants or an error message
     searchParticipants: query([text], Result(Vec(Participant), Message), (searchTerm) => {
         const lowerCaseSearchInput = searchTerm.toLowerCase();
-        try {
-            const searchedParticipants = participantStorage.values().filter((participant) => participant.name.toLowerCase().includes(lowerCaseSearchInput) || participant.interest.toLowerCase().includes(lowerCaseSearchInput));
-            
-            return Ok(searchedParticipants);
-        } catch (error) {
-            return Err({ NotFound: `Participant with the term ${searchTerm} has not been found in name or Interest` });
-        }
-
+        const searchedParticipants = participantStorage.values().filter((participant) => participant.name.toLowerCase() === lowerCaseSearchInput || participant.interest.toLowerCase() === lowerCaseSearchInput);
+        
+        return Ok(searchedParticipants);
     }
     ),
 

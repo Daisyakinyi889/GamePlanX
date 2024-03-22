@@ -36,13 +36,23 @@ const GameCard = ({game}) => {
           <Card.Text className="text-secondary">
             <span>{location}</span>
           </Card.Text>
+          {/* Add participants name as a list from participants array  use badge*/}
+          <Card.Text className="text-secondary">
+            <span>Participants: </span>
+            {participants ? participants.map((participant, index) => (
+              <Badge key={index} bg="secondary" className="ms-1">
+                {participant.name}
+              </Badge>
+            )) : "No Participants"}
+          </Card.Text>      
+
             <div className="d-flex justify-content-end">
                 <InsertParticipant gameId={id} />
                 <RemoveParticipant gameId={id} />
             </div>
             
 
-          <div className="d-flex justify-content-end">
+          <div className="d-flex justify-content-end mt-2">
             <DeleteGame gameId={id} />
             </div>
         </Card.Body>

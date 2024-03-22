@@ -3,6 +3,7 @@ import { Row,  Button, Col,Form, InputGroup } from "react-bootstrap";
 
 const FilterSection = ({handleSearchGame,handleSearchParticipant, filterByCategory}) => {
     const [category, setCategory] = useState("");
+    const [searchGame, setSearchGame] = useState("");
     const [search, setSearch] = useState("");
 
   return (
@@ -13,12 +14,12 @@ const FilterSection = ({handleSearchGame,handleSearchParticipant, filterByCatego
                 type="text"
                 placeholder="Search Game"
                 onChange={(e) => {
-                    setSearch(e.target.value);
+                    setSearchGame(e.target.value);
                 }}
             />
             <Button variant="dark" id="button-addon2"
                 onClick={() => {
-                    handleSearchGame(search);
+                    handleSearchGame(searchGame);
                 }}  
             >
                 <i className="bi bi-search"></i>

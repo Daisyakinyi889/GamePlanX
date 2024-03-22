@@ -93,7 +93,7 @@ const AddGame = ({save}) => {
               className="mb-3"
             >
               <Form.Control
-                type="text"
+                type="date"
                 placeholder="Start Date"
                 onChange={(e) => {
                   setStartDate(e.target.value);
@@ -106,7 +106,7 @@ const AddGame = ({save}) => {
               className="mb-3"
             >
               <Form.Control
-                type="text"
+                type="date"
                 placeholder="End Date"
                 onChange={(e) => {
                   setEndDate(e.target.value);

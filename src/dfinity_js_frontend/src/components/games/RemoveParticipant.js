@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Button, Modal, Table } from "react-bootstrap";
 import { getParticipants as getParticipantsList, removeParticipant } from "../../utils/marketplace";
+import { NotificationError, NotificationSuccess } from "../utils/Notifications";
+import {toast} from 'react-toastify';
 
-const RemoveParticipant = () => {
+const RemoveParticipant = ({gameId}) => {
 
     const [participants, setParticipants] = useState([]);
 
@@ -14,17 +16,19 @@ const RemoveParticipant = () => {
 
     const getParticipants = useCallback(async () => {
         try {
-        setParticipants(await getParticipantsList());
+            setParticipants(await getParticipantsList());
         } catch (error) {
-        console.log({ error });
+            console.log({ error });
         } 
     });
-
+    
     const handleRemoveParticipant = async (participantId) => {
         try {
             await removeParticipant(gameId, participantId);
+            toast(<NotificationSuccess text="Participant removed from Game  successfully." />);
         } catch (error) {
             console.log({ error });
+            toast(<NotificationError text="Participant remove from Game not successfully." />);
         }
     }
 
@@ -34,15 +38,15 @@ const RemoveParticipant = () => {
   return (
     <>
          <Button
-            variant="outline-dark"
-            className="w-100 py-3"
+            variant="danger"
+            className="mx-2 py-1"
             onClick={handleShow}
 
           >
             {/* Here remove Participant from Game */}
             Release
           </Button>
-        <Modal show={show} onHide={handleClose} centered>
+        <Modal show={show} onHide={handleClose} centered size="xl">
             <Modal.Header closeButton>
                 <Modal.Title>Remove Participant</Modal.Title>
             </Modal.Header>
